@@ -83,6 +83,10 @@ def main():
     write(out/'cities.geojson',{'type':'FeatureCollection','features':points})
     versions={'figure2':'publication383_fig1245_preview_20261001/full/outputs/02_fig2','figure3':'publication383_figure3_repaired_20261003/outputs/03_fig3'}
     provenance={'host':'5090','root':'/home/xiucheng/projects/Voxcity','versions':versions,'figure2Cities':len(stats),'figure3Cities':len(fig3),'cbgCount':len(cbg),'geometrySources':['/data/xiucheng/voxcity/data/morphology_383_msa_building_vegetation_2020/msa_383_boundaries.parquet','/data/xiucheng/voxcity/data/accessibility_k3_383_msa_repaired_2020/accessibility_k3_383_msa.parquet'],'geometrySimplificationMeters':60,'standardization':'Figure 2 mean_access_z and mean_eei_z; floor-population-weighted CBG means','preservation':'100 × qualifying ≤15-min floor population / valid ≤15-min floor population; qualify when 0.5 × (Nature/outer Nature + Openness/outer Openness) ≥ 1','files':{str(p.relative_to(SOURCE)):hashlib.sha256(p.read_bytes()).hexdigest() for p in SOURCE.rglob('*') if p.is_file() and p.suffix!='.part'}}
+    if (current/'provenance.json').exists():
+        previous=json.loads((current/'provenance.json').read_text())
+        if 'buildingRanking' in previous:provenance['buildingRanking']=previous['buildingRanking']
+    if (current/'building-ranks-summary.csv').exists():shutil.copy2(current/'building-ranks-summary.csv',out/'building-ranks-summary.csv')
     write(out/'provenance.json',provenance)
     write(out/'index.json',{'cities':index,'bivariatePalette':PALETTE,'eeiCBGBreaks':cbg.eei_z.quantile([.2,.4,.6,.8]).tolist(),'figure2':versions['figure2'],'figure3':versions['figure3'],'globalFit':pd.read_csv(SOURCE/'fig2/fig2_global_city_equal_fit.csv').iloc[0].to_dict(),'metricScale':'z-score','chips':configured})
     assert all((out/'metros'/f'{city["id"]}.json').exists() for city in index)

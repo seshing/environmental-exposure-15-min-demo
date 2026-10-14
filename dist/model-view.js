@@ -125,11 +125,12 @@ function showTradeoff(code){
   $('tradeoff-rank').title='EEI residual percentile relative to the metro reference fit';
   const lo=tradeoff.accessLogMin,hi=tradeoff.accessLogMax;
   const index=minutes=>1-(Math.log1p(minutes)-lo)/(hi-lo);
-  const x=value=>32+index(value)*202,y=value=>226-value*202;
+  const ymin=tradeoff.eeiMin??0,ymax=tradeoff.eeiMax??1;
+  const x=value=>32+index(value)*202,y=value=>226-(value-ymin)/(ymax-ymin)*202;
   const dots=tradeoff.samplePoints.map(([a,b])=>`<circle cx="${x(a).toFixed(1)}" cy="${y(b).toFixed(1)}" r="1.4"/>`).join('');
   $('tradeoff-plot').innerHTML=`<svg viewBox="0 0 244 266" role="img" aria-label="Selected building EEI and access index against the city reference">
-    <text class="chart-label" x="32" y="12">EEI</text><g class="chart-grid"><path d="M32 24H234 M32 125H234 M32 226H234"/></g>
-    <g class="chart-ticks"><text x="25" y="28" text-anchor="end">1</text><text x="25" y="129" text-anchor="end">0.5</text><text x="25" y="230" text-anchor="end">0</text><text x="32" y="241" text-anchor="middle">0</text><text x="133" y="241" text-anchor="middle">0.5</text><text x="234" y="241" text-anchor="middle">1</text></g>
+    <text class="chart-label" x="32" y="12">${tradeoff.metricScale==='z-score'?'EEI · z-score':'EEI'}</text><g class="chart-grid"><path d="M32 24H234 M32 125H234 M32 226H234"/></g>
+    <g class="chart-ticks"><text x="25" y="28" text-anchor="end">${ymax.toFixed(1)}</text><text x="25" y="129" text-anchor="end">${((ymin+ymax)/2).toFixed(1)}</text><text x="25" y="230" text-anchor="end">${ymin.toFixed(1)}</text><text x="32" y="241" text-anchor="middle">0</text><text x="133" y="241" text-anchor="middle">0.5</text><text x="234" y="241" text-anchor="middle">1</text></g>
     <svg x="32" y="24" width="202" height="202" viewBox="32 24 202 202" overflow="hidden"><g class="chart-dots">${dots}</g><path class="chart-fit" d="M32 ${y(tradeoff.intercept+tradeoff.slope*hi)}L234 ${y(tradeoff.intercept+tradeoff.slope*lo)}"/></svg>
     <circle class="chart-building-halo" cx="${x(item.minutes)}" cy="${y(item.eei)}" r="10"/><circle class="chart-building" cx="${x(item.minutes)}" cy="${y(item.eei)}" r="5"><title>EEI ${item.eei.toFixed(3)} · Access index ${index(item.minutes).toFixed(3)}</title></circle>
     <text class="chart-label" x="133" y="259" text-anchor="middle">Access index</text></svg>`;
