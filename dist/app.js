@@ -38,7 +38,7 @@ function cityChart(city){
   const [xmin,xmax]=limits('access'),[ymin,ymax]=limits('eei');
   const x=v=>36+(v-xmin)/(xmax-xmin)*224,y=v=>250-(v-ymin)/(ymax-ymin)*224;
   const dots=index.cities.map(c=>`<circle cx="${x(c.access)}" cy="${y(c.eei)}" r="2.5" fill="${c.bivariate}" opacity=".55"><title>${c.name}</title></circle>`).join('');
-  $('city-chart').innerHTML=`<svg viewBox="0 0 290 290" role="img" aria-label="Figure 2a national city accessibility and EEI; ${city.shortName} highlighted"><g class="chart-grid"><path d="M36 26H260 M36 138H260 M36 250H260 M36 26V250 M148 26V250 M260 26V250"/></g>${dots}<circle class="chart-building-halo" style="fill:${city.bivariate}" cx="${x(city.access)}" cy="${y(city.eei)}" r="12"/><circle class="chart-building" style="fill:${city.bivariate}" cx="${x(city.access)}" cy="${y(city.eei)}" r="5.5"><title>${city.shortName}: accessibility ${label(city.access)}, EEI ${label(city.eei)}</title></circle><g class="chart-label"><text x="36" y="14">EEI</text><text x="27" y="253" text-anchor="end">${label(ymin)}</text><text x="27" y="141" text-anchor="end">${label((ymin+ymax)/2)}</text><text x="27" y="29" text-anchor="end">${label(ymax)}</text><text x="36" y="265" text-anchor="middle">${label(xmin)}</text><text x="148" y="265" text-anchor="middle">${label((xmin+xmax)/2)}</text><text x="260" y="265" text-anchor="middle">${label(xmax)}</text><text x="148" y="284" text-anchor="middle">City accessibility →</text></g></svg>`;
+  $('city-chart').innerHTML=`<svg viewBox="0 0 290 290" role="img" aria-label="Figure 2a national city accessibility and EEI; ${city.shortName} highlighted"><g class="chart-grid"><path d="M36 26H260 M36 138H260 M36 250H260 M36 26V250 M148 26V250 M260 26V250"/></g>${dots}<circle class="chart-building-halo" style="fill:${city.bivariate}" cx="${x(city.access)}" cy="${y(city.eei)}" r="12"/><circle class="chart-building" style="fill:${city.bivariate}" cx="${x(city.access)}" cy="${y(city.eei)}" r="5.5"><title>${city.shortName}: accessibility ${label(city.access)}, EEI ${label(city.eei)}</title></circle><g class="chart-label"><text x="36" y="14">EEI · z-score</text><text x="27" y="253" text-anchor="end">${label(ymin)}</text><text x="27" y="141" text-anchor="end">${label((ymin+ymax)/2)}</text><text x="27" y="29" text-anchor="end">${label(ymax)}</text><text x="36" y="265" text-anchor="middle">${label(xmin)}</text><text x="148" y="265" text-anchor="middle">${label((xmin+xmax)/2)}</text><text x="260" y="265" text-anchor="middle">${label(xmax)}</text><text x="148" y="284" text-anchor="middle">Accessibility · z-score →</text></g></svg>`;
   $('city-chart-note').textContent='';
 }
 function cityPanel(city,metro){
@@ -47,14 +47,14 @@ function cityPanel(city,metro){
   $('city-title').textContent=city.shortName;$('msa-name').textContent=city.name;
   $('city-ranks').innerHTML=scale('access','Accessibility')+scale('eei','Environmental exposure');
   for(const point of $('city-ranks').querySelectorAll('.rank-point')){
-    point.onmouseenter=point.onmousemove=event=>{const tip=$('value-tooltip');tip.textContent=point.dataset.label+' · '+Number(point.dataset.value).toFixed(3);tip.hidden=false;tip.style.left=Math.min(event.clientX+12,innerWidth-195)+'px';tip.style.top=Math.max(8,event.clientY-44)+'px';};
+    point.onmouseenter=point.onmousemove=event=>{const tip=$('value-tooltip');tip.textContent=point.dataset.label+' · z-score '+Number(point.dataset.value).toFixed(3);tip.hidden=false;tip.style.left=Math.min(event.clientX+12,innerWidth-195)+'px';tip.style.top=Math.max(8,event.clientY-44)+'px';};
     point.onmouseleave=()=>{$('value-tooltip').hidden=true;};
   }
   cityChart(city);
   const rows=[['mid15_30','15–30 min'],['mid30_60','30–60 min'],['outside60','>60 min']];
   const values=rows.map(([key])=>metro.preservation?.[key]);
   if(values.some(Number.isFinite)){
-    $('ring-loss').innerHTML=`<svg viewBox="0 0 290 54" role="img" aria-label="Percentage of the 15-minute population matching or exceeding outer-ring mean exposure"><path class="percentile-track" d="M10 15H280"/>${values.map((v,i)=>Number.isFinite(v)?`<circle cx="${10+Math.min(v,50)*5.4}" cy="15" r="4.5" fill="${ringColors[rows[i][0]]}" stroke="white" stroke-width="1"><title>${rows[i][1]}: ${v.toFixed(1)}% of the 15-minute population has exposure at least as high as the ring mean</title></circle>${v>50?`<path d="M281 10L287 15L281 20" fill="none" stroke="${ringColors[rows[i][0]]}"/>`:""}`:'').join('')}<g class="chart-label"><text x="10" y="44">0%</text><text x="145" y="44" text-anchor="middle">25%</text><text x="280" y="44" text-anchor="end">50%</text></g></svg><div class="capacity-key">${rows.map(([key,name],i)=>`<span><i style="background:${ringColors[key]}"></i>${name}<strong>${Number.isFinite(values[i])?values[i].toFixed(1)+'%':'—'}</strong></span>`).join('')}</div>`;
+    $('ring-loss').innerHTML=`<svg viewBox="0 0 290 54" role="img" aria-label="Percentage of the 15-minute population matching or exceeding outer-ring relative exposure"><path class="percentile-track" d="M10 15H280"/>${values.map((v,i)=>Number.isFinite(v)?`<circle cx="${10+Math.min(v,50)*5.4}" cy="15" r="4.5" fill="${ringColors[rows[i][0]]}" stroke="white" stroke-width="1"><title>${rows[i][1]}: ${v.toFixed(1)}% of the 15-minute population has relative exposure ≥ 1 against the outer ring</title></circle>${v>50?`<path d="M281 10L287 15L281 20" fill="none" stroke="${ringColors[rows[i][0]]}"/>`:""}`:'').join('')}<g class="chart-label"><text x="10" y="44">0%</text><text x="145" y="44" text-anchor="middle">25%</text><text x="280" y="44" text-anchor="end">50%</text></g></svg><div class="capacity-key">${rows.map(([key,name],i)=>`<span><i style="background:${ringColors[key]}"></i>${name}<strong>${Number.isFinite(values[i])?values[i].toFixed(1)+'%':'—'}</strong></span>`).join('')}</div>`;
   }else $('ring-loss').textContent='Unavailable';
   $('loss-note').textContent='';
   $('city-panel').hidden=false;document.body.classList.add('has-msa-details');
@@ -88,18 +88,18 @@ document.addEventListener('click',event=>{if(!event.target.closest('#city-picker
 function renderCityMap(){
   $('access-map').setAttribute('aria-pressed',String(cityMapMode==='access'));$('eei-map').setAttribute('aria-pressed',String(cityMapMode==='eei'));
   const colors=['#81373e','#ac7777','#aaa49a','#9cba91','#63985e'],breaks=index.eeiCBGBreaks;
-  const color=cityMapMode==='access'?['match',['get','ring'],...Object.entries(ringColors).flat(),'#c4cbc7']:['step',['coalesce',['get','eei_cbg_equal'],0],colors[0],...breaks.flatMap((value,i)=>[value,colors[i+1]])];
+  const color=cityMapMode==='access'?['match',['get','ring'],...Object.entries(ringColors).flat(),'#c4cbc7']:['step',['coalesce',['get','eei'],0],colors[0],...breaks.flatMap((value,i)=>[value,colors[i+1]])];
   map.setPaintProperty('rings-fill','fill-color',color);
-  const filters=selectedEEI==null||cityMapMode!=='eei'?null:['all',['==',['get','hasExposure'],true],['>=',['get','eei_cbg_equal'],selectedEEI===0?0:breaks[selectedEEI-1]],[selectedEEI===colors.length-1?'<=':'<',['get','eei_cbg_equal'],selectedEEI===colors.length-1?1:breaks[selectedEEI]]];
+  const filters=selectedEEI==null||cityMapMode!=='eei'?null:['all',['==',['get','hasExposure'],true],...(selectedEEI===0?[]:[['>=',['get','eei'],breaks[selectedEEI-1]]]),...(selectedEEI===colors.length-1?[]:[['<',['get','eei'],breaks[selectedEEI]]])];
   map.setFilter('rings-fill',filters);
   if(cityMapMode==='access')$('ring-legend').innerHTML='<div class="legend-title">CBG access-time rings</div>'+[['inside15','≤15 min'],['mid15_30','15–30 min'],['mid30_60','30–60 min'],['outside60','>60 min']].map(([key,name])=>`<div class="ring-key"><span style="background:${ringColors[key]}"></span>${name}</div>`).join('')+'<div class="tradeoff-source">Unfilled: no EEI data</div>';
   else{
-    $('ring-legend').innerHTML='<div class="legend-title">CBG EEI</div><div class="eei-key">'+colors.map((color,i)=>`<button data-eei="${i}" aria-pressed="${selectedEEI===i}"><i style="background:${color}"></i>${['Very low','Low','Medium','High','Very high'][i]}</button>`).join('')+'</div><div class="tradeoff-source">National CBG quintiles · no data unfilled</div>';
+    $('ring-legend').innerHTML='<div class="legend-title">CBG EEI · z-score</div><div class="eei-key">'+colors.map((color,i)=>`<button data-eei="${i}" aria-pressed="${selectedEEI===i}"><i style="background:${color}"></i>${['Very low','Low','Medium','High','Very high'][i]}</button>`).join('')+'</div><div class="tradeoff-source">National CBG quintiles · no data unfilled</div>';
     for(const button of $('ring-legend').querySelectorAll('[data-eei]'))button.onclick=()=>{const value=Number(button.dataset.eei);selectedEEI=selectedEEI===value?null:value;renderCityMap();};
   }
 }
 $('access-map').onclick=()=>{cityMapMode='access';renderCityMap();};$('eei-map').onclick=()=>{cityMapMode='eei';renderCityMap();};
-function showCBG(feature){const p=feature.properties;$('cbg-note').textContent=`CBG ${p.GEOID} · ${Number(p.minutes).toFixed(1)} min${p.hasExposure===true||p.hasExposure==='true'?' · EEI '+Number(p.eei_cbg_equal).toFixed(2):' · no EEI record'}`;$('cbg-note').hidden=false;}
+function showCBG(feature){const p=feature.properties;$('cbg-note').textContent=`CBG ${p.GEOID} · ${Number(p.minutes).toFixed(1)} min${p.hasExposure===true||p.hasExposure==='true'?' · EEI '+Number(p.eei).toFixed(2):' · no EEI record'}`;$('cbg-note').hidden=false;}
 map.on('click',event=>{
   if(event.originalEvent?.target?.closest?.('button,select')||map.isMoving())return;
   if(stage==='us'){const hit=map.queryRenderedFeatures(event.point,{layers:['cities']})[0];if(hit)openCity(hit.properties.id);}

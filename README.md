@@ -3,7 +3,7 @@
 A local, static research website with a minimal white interface.
 
 - **United States:** switch between the Figure 2 population-weighted accessibility × EEI city profile and within-city CBG **local r**. Colours use the original Figure 2 palette and terciles; dot sizes retain the original population classes with larger circles and a 2–5M legend entry. The local-r map retains the paper’s `p < 0.01` filter.
-- **MSA:** view its boundary and CBG access-time rings (≤15, 15–30, 30–60, >60 minutes). The city panel highlights the selected city among the 388 Figure 2a city profiles. Accessibility and exposure are shown as national empirical percentiles (P100 is highest), without population totals. The Access time / EEI tabs switch CBG map colouring; EEI classes use fixed national CBG quintiles and allow category filtering. Three dots on a 0–50% scale show the original Figure 3 availability (values beyond the scale keep their true labels): the population-weighted share of ≤15-minute building layers whose exposure meets or exceeds each source-ring mean. This is preservation capacity, not 100% minus EEI loss. Scatter plotting areas have equal width and height.
+- **MSA:** view its boundary and CBG access-time rings (≤15, 15–30, 30–60, >60 minutes). The city panel highlights the selected city among the 380 Figure 2a city profiles. Accessibility and exposure are shown as national empirical percentiles (P100 is highest), without population totals. The Access time / EEI tabs switch CBG map colouring; EEI classes use fixed national CBG quintiles and allow category filtering. Three dots on a 0–50% scale show the original Figure 3 availability (values beyond the scale keep their true labels): the population-weighted share of ≤15-minute building layers whose component-relative exposure reaches 1 against each outer ring. This is the published component-relative preservation capacity. Scatter plotting areas have equal width and height.
 - **Chip:** 30 cities each display one verified 5 m chip. Washington retains `chip_64482_pid_103_36`; the other 29 cities were selected from the largest Figure 3 eligible metros. The chip lies near the median location of each city’s 50 most accessible CBGs. Cities with models have a `3D` label in the city menu. Click the green chip outline to enter its model.
 - **5 m model:** switch **Nature view / Openness**. Click a building to focus it and see its mean, ID and footprint area; click again to inspect a 5 m voxel layer. Building and tree-canopy visibility are independent, and hiding canopy retains grass. Voxel layers are not surveyed floors.
 
@@ -18,14 +18,14 @@ Open http://127.0.0.1:8876/. Everything is read from static files; no simulation
 
 ## Research results
 
-The site reads existing local outputs from `/Users/seshing/NUS/Projects/EnvirExpose_final/`:
+The national and MSA maps use the specified publication outputs downloaded read-only from SSH host `5090`:
 
-- Figure 2: `city_stats_final_no_geometry_100pct.parquet` and `local_relationship_data_100pct.pkl`, containing 388 city records. National city profiles and the saved local r values are used directly, without a browser refit.
-- Figure 3: the final `fig3_fresh_cbg_equal_city_ring_equal_environmental_cost_opportunity_primary_all_cities.csv` (155 eligible cities), the corresponding fresh CBG EEI table, and MSA/CBG geometries. The method uses floor-equal CBG EEI means and CBG-equal city-ring means.
-- Loss is `100 × (source-ring mean EEI − ≤15-minute mean EEI) / source-ring mean EEI`. Washington’s three published-cache values are 16.8044%, 19.8547% and 22.3199%. Cities outside the final Figure 3 sample display unavailable estimates; none are invented.
-- Rings are based on CBG access times, not circles around a city centre. CBG boundaries are simplified by 60 m for display only. Unfilled polygons lack a Figure 3 EEI record. Source metric values remain unchanged.
+- Figure 2: `/home/xiucheng/projects/Voxcity/output/publication383_fig1245_preview_20261001/full/outputs/02_fig2/`. The saved city summary contains **380 eligible cities**. City coordinates use `mean_access_z` and `mean_eei_z`, with floor-population-weighted CBG means. Local correlations, p-values and sample sizes are read directly; the original `p < 0.01` filter and tercile palette are retained.
+- Figure 3: `/home/xiucheng/projects/Voxcity/output/publication383_figure3_repaired_20261003/outputs/03_fig3/`. The saved result contains **212 eligible cities**. Preservation is the population-weighted share of valid ≤15-minute floors where `0.5 × (Nature / outer-ring Nature + Openness / outer-ring Openness) ≥ 1`. It is read from `fig3_floor_preservation_capacity.csv`, rather than computed from EEI loss. Washington's 15–30, 30–60 and >60-minute values are **30.0364%, 23.5178% and 14.2361%**.
+- CBG exposure and access times use the latest Figure 2 table (167,659 valid CBGs). All 52,602 overlapping Figure 3 CBG rows match exactly. CBG EEI colours use national z-score quintiles. No exposure is imputed for missing records.
+- MSA boundaries and the 196,266 CBG geometries come from the repaired 2020 geography used by the publication. CBG boundaries are simplified by 60 m for drawing only; metric values are unchanged.
 
-These are the existing local paper-cache versions. The repository link is the project reference, not a claim that remote GitHub data were synchronized.
+Downloaded tables and code snapshots remain in `source/publication_latest/`, outside the website and Git. `dist/data/project/provenance.json` records versions, source checksums and definitions. The 30 precomputed chip models and their separate building reference calculations are retained; this map-data update does not rerun simulations or regenerate building-level reference metrics.
 
 ## Real 5 m model
 
