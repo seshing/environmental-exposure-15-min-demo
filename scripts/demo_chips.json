@@ -1,0 +1,182 @@
+[
+  {
+    "id": "chip_70118_pid_110_41",
+    "city": "35620",
+    "manifest": "data/chips/chip_70118_pid_110_41/model.json",
+    "name": "New York"
+  },
+  {
+    "id": "chip_8773_pid_11_22",
+    "city": "31080",
+    "manifest": "data/chips/chip_8773_pid_11_22/model.json",
+    "name": "Los Angeles"
+  },
+  {
+    "id": "chip_37195_pid_79_44",
+    "city": "16980",
+    "manifest": "data/chips/chip_37195_pid_79_44/model.json",
+    "name": "Chicago"
+  },
+  {
+    "id": "chip_21793_pid_59_19",
+    "city": "19100",
+    "manifest": "data/chips/chip_21793_pid_59_19/model.json",
+    "name": "Dallas"
+  },
+  {
+    "id": "chip_24628_pid_62_11",
+    "city": "26420",
+    "manifest": "data/chips/chip_24628_pid_62_11/model.json",
+    "name": "Houston"
+  },
+  {
+    "id": "chip_58472_pid_96_1",
+    "city": "33100",
+    "manifest": "data/chips/chip_58472_pid_96_1/model.json",
+    "name": "Miami"
+  },
+  {
+    "id": "chip_67640_pid_107_39",
+    "city": "37980",
+    "manifest": "data/chips/chip_67640_pid_107_39/model.json",
+    "name": "Philadelphia"
+  },
+  {
+    "id": "chip_64482_pid_103_36",
+    "city": "47900",
+    "manifest": "data/chips/chip_64482_pid_103_36/model.json",
+    "name": "Washington"
+  },
+  {
+    "id": "chip_43655_pid_87_21",
+    "city": "12060",
+    "manifest": "data/chips/chip_43655_pid_87_21/model.json",
+    "name": "Atlanta"
+  },
+  {
+    "id": "chip_2345_pid_2_32",
+    "city": "41860",
+    "manifest": "data/chips/chip_2345_pid_2_32/model.json",
+    "name": "San Francisco"
+  },
+  {
+    "id": "chip_12680_pid_25_21",
+    "city": "38060",
+    "manifest": "data/chips/chip_12680_pid_25_21/model.json",
+    "name": "Phoenix"
+  },
+  {
+    "id": "chip_10161_pid_13_22",
+    "city": "40140",
+    "manifest": "data/chips/chip_10161_pid_13_22/model.json",
+    "name": "Riverside"
+  },
+  {
+    "id": "chip_2709_pid_2_62",
+    "city": "42660",
+    "manifest": "data/chips/chip_2709_pid_2_62/model.json",
+    "name": "Seattle"
+  },
+  {
+    "id": "chip_73424_pid_116_46",
+    "city": "14460",
+    "manifest": "data/chips/chip_73424_pid_116_46/model.json",
+    "name": "Boston"
+  },
+  {
+    "id": "chip_28585_pid_67_54",
+    "city": "33460",
+    "manifest": "data/chips/chip_28585_pid_67_54/model.json",
+    "name": "Minneapolis"
+  },
+  {
+    "id": "chip_47833_pid_91_6",
+    "city": "45300",
+    "manifest": "data/chips/chip_47833_pid_91_6/model.json",
+    "name": "Tampa"
+  },
+  {
+    "id": "chip_15748_pid_41_38",
+    "city": "19740",
+    "manifest": "data/chips/chip_15748_pid_41_38/model.json",
+    "name": "Denver"
+  },
+  {
+    "id": "chip_53460_pid_93_8",
+    "city": "36740",
+    "manifest": "data/chips/chip_53460_pid_93_8/model.json",
+    "name": "Orlando"
+  },
+  {
+    "id": "chip_55880_pid_95_25",
+    "city": "16740",
+    "manifest": "data/chips/chip_55880_pid_95_25/model.json",
+    "name": "Charlotte"
+  },
+  {
+    "id": "chip_31955_pid_74_35",
+    "city": "41180",
+    "manifest": "data/chips/chip_31955_pid_74_35/model.json",
+    "name": "St. Louis"
+  },
+  {
+    "id": "chip_1468_pid_1_56",
+    "city": "38900",
+    "manifest": "data/chips/chip_1468_pid_1_56/model.json",
+    "name": "Portland"
+  },
+  {
+    "id": "chip_11647_pid_18_28",
+    "city": "29820",
+    "manifest": "data/chips/chip_11647_pid_18_28/model.json",
+    "name": "Las Vegas"
+  },
+  {
+    "id": "chip_17951_pid_55_10",
+    "city": "41700",
+    "manifest": "data/chips/chip_17951_pid_55_10/model.json",
+    "name": "San Antonio"
+  },
+  {
+    "id": "chip_5445_pid_4_35",
+    "city": "40900",
+    "manifest": "data/chips/chip_5445_pid_4_35/model.json",
+    "name": "Sacramento"
+  },
+  {
+    "id": "chip_65336_pid_104_37",
+    "city": "12580",
+    "manifest": "data/chips/chip_65336_pid_104_37/model.json",
+    "name": "Baltimore"
+  },
+  {
+    "id": "chip_4639_pid_3_31",
+    "city": "41940",
+    "manifest": "data/chips/chip_4639_pid_3_31/model.json",
+    "name": "San Jose"
+  },
+  {
+    "id": "chip_18829_pid_57_12",
+    "city": "12420",
+    "manifest": "data/chips/chip_18829_pid_57_12/model.json",
+    "name": "Austin"
+  },
+  {
+    "id": "chip_26233_pid_64_36",
+    "city": "28140",
+    "manifest": "data/chips/chip_26233_pid_64_36/model.json",
+    "name": "Kansas City"
+  },
+  {
+    "id": "chip_43133_pid_86_36",
+    "city": "17140",
+    "manifest": "data/chips/chip_43133_pid_86_36/model.json",
+    "name": "Cincinnati"
+  },
+  {
+    "id": "chip_51685_pid_93_43",
+    "city": "17410",
+    "manifest": "data/chips/chip_51685_pid_93_43/model.json",
+    "name": "Cleveland"
+  }
+]

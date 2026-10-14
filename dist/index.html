@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Environmental Exposure · 15-minute City</title>
+  <meta name="description" content="Explore accessibility and environmental exposure across U.S. cities, MSA travel-time rings, and real 5 m VoxCity models.">
+  <link rel="stylesheet" href="vendor/maplibre-gl.css"><link rel="stylesheet" href="style.css">
+  <script src="vendor/maplibre-gl.js"></script>
+</head>
+<body>
+  <main id="map" aria-label="United States map and interactive VoxCity model"></main>
+  <div class="navigation glass"><button id="back" aria-label="Back to United States" hidden>←</button><span id="location">United States</span></div>
+  <div id="overview-switch" class="overview-switch glass" role="group" aria-label="Figure 2 map view"><button id="profile-mode" aria-pressed="true">City profile</button><button id="local-mode" aria-pressed="false">Local trade-off</button></div>
+  <div id="city-picker" class="city-picker"><button id="city-search" class="city-search glass" aria-expanded="false" aria-controls="city-menu">Explore a city <span aria-hidden="true">⌄</span></button><div id="city-menu" class="city-menu glass" hidden><input id="city-filter" type="search" placeholder="Find a city" aria-label="Find a city"><div id="city-options" class="city-options" aria-label="Cities"></div></div></div>
+  <div id="chip-hint" class="chip-hint" hidden>zoom in to model</div>
+  <div id="city-map-switch" class="city-map-switch glass" role="group" aria-label="CBG map layer" hidden><button id="access-map" aria-pressed="true">Access time</button><button id="eei-map" aria-pressed="false">EEI</button></div>
+  <button id="msa-details" class="msa-details glass" hidden>City results</button>
+  <div id="metric" class="metric glass" hidden><span class="metric-dot"></span><div id="model-picker" class="model-picker"><button id="model-metric" class="model-trigger" aria-label="Model exposure metric" aria-expanded="false" aria-controls="model-menu"><span id="model-metric-name">Nature view</span><span class="model-chevron" aria-hidden="true">⌄</span></button><div id="model-menu" class="model-menu glass" role="group" aria-label="Exposure metric options" hidden><button data-metric="nature" aria-pressed="true">Nature view</button><button data-metric="openness" aria-pressed="false">Openness</button></div></div><button id="reset" aria-label="Reset model view" title="Reset view">↺</button></div>
+  <div id="display-layers" class="display-layers glass" role="group" aria-label="Model visibility" hidden><button id="buildings-toggle" aria-pressed="true">Buildings</button><button id="vegetation-toggle" aria-pressed="true">Tree canopy</button></div>
+  <div id="loading" class="glass loading" role="status" hidden><span class="spinner"></span><span id="loading-text">Loading model</span><button id="retry" hidden>Retry</button></div>
+  <aside id="city-panel" class="glass city-panel" aria-label="MSA city results" hidden>
+    <div class="panel-heading"><strong id="city-title"></strong><button id="city-close" aria-label="Close city results">×</button></div>
+    <div id="msa-name" class="msa-name"></div>
+    <div class="rank-caption">Compared with U.S. cities</div><div id="city-ranks" class="city-ranks"></div>
+    <div id="city-chart" class="city-chart"></div><div id="city-chart-note" class="tradeoff-source"></div>
+    <div class="section-label">Population in 15-min areas with comparable exposure to outer rings</div><div id="ring-loss"></div><div id="loss-note" class="tradeoff-source"></div>
+  </aside>
+  <div id="value-tooltip" class="glass value-tooltip" hidden></div>
+  <div id="cbg-note" class="cbg-note glass" hidden></div>
+  <aside id="inspector" class="glass inspector" aria-label="Selected building exposure" hidden>
+    <div class="panel-heading"><span>Building <span id="building-id"></span></span><button id="close" aria-label="Close building details">×</button></div>
+    <div id="exposure-number" class="exposure-number dual-exposure">
+      <div class="nature-output"><span id="nature-value"></span><small>Nature view</small></div>
+      <div class="openness-output"><span id="openness-value"></span><small>Openness</small></div>
+    </div>
+    <div class="building-summary">
+      <div><small id="area-label">Footprint area</small><span id="building-area"></span></div>
+      <div><small>CBG travel time</small><span id="accessibility-value"></span></div>
+    </div>
+    <div id="building-hint" class="building-hint" hidden>Click a level to inspect</div>
+    <div id="surface-note" class="surface-note" hidden>Level <span id="level-number"></span> · <span id="resolution">5</span> m voxel layer</div>
+    <section id="rank-section" class="rank-section" aria-label="Building ranks">
+      <div id="building-ranks" class="building-ranks"></div>
+    </section>
+    <section id="tradeoff" class="tradeoff" aria-label="Building EEI trade-off position">
+      <div class="tradeoff-heading"><span>EEI trade-off</span><span id="tradeoff-rank"></span></div>
+      <div id="tradeoff-plot"></div>
+      <div id="eei-ranks" class="building-ranks eei-ranks"></div>
+    </section>
+  </aside>
+  <div id="legend" class="glass legend" hidden><div class="legend-title"><span id="legend-name">Nature view</span><span id="legend-resolution">5 m</span></div><div class="color-ramp"></div><div class="legend-labels"><span>0%</span><span id="legend-middle">25%</span><span id="legend-high">50%+</span></div><div class="missing"><span></span>No recorded value</div></div>
+  <div id="population-legend" class="glass population-legend" hidden></div>
+  <div id="overview-legend" class="glass legend"></div>
+  <div id="ring-legend" class="glass legend" hidden><div class="legend-title">CBG access-time rings</div><div class="ring-key"><span style="background:#173b5f"></span>≤15 min</div><div class="ring-key"><span style="background:#2e6f9e"></span>15–30 min</div><div class="ring-key"><span style="background:#91c3e6"></span>30–60 min</div><div class="ring-key"><span style="background:#9db8a7"></span>&gt;60 min</div><div class="tradeoff-source">Unfilled: no EEI data</div></div>
+  <div id="help" class="glass help" hidden><strong>Environmental exposure in the 15-minute city</strong><p>Choose City profile or Local trade-off to explore the Figure 2 results. Dot size represents population. Select a city to open its MSA.</p><p>MSA rings follow CBG access times, not distance from the city centre. Preservation capacity is the population-weighted share of ≤15-minute building layers whose exposure matches or exceeds the source-ring mean, using the original Figure 3 availability results. Cities outside the final eligible sample show no loss estimate.</p><p>Green chip outlines have a model ready. Grey outlines are reference areas. Start with the Washington test chip.</p><p>In a model, drag to pan, right-drag to rotate and tilt, and scroll to zoom. Click once to focus a building, then click a layer to inspect its mean. Choose Nature view or Openness. Layers are 5 m voxels, not surveyed floors. Tree canopy can be hidden while grass remains visible.</p><p>Building trade-off charts use paired finite model surface values with the saved national paper EEI normalization. The metro reference uses paired, valid paper building layers. CBG travel times average nine categories, with a logarithmic time axis. They are distinct from Figure 2 CBG-level EEI fits and Figure 3 ring losses. Missing results are never imputed.</p><a href="https://github.com/seshing/environmental-exposure-15-min" target="_blank" rel="noopener">Project ↗</a><small>Model and simulations: VoxCity<br>Basemap: OpenFreeMap · OpenStreetMap<br>U.S. boundary: Natural Earth</small></div>
+  <button id="info" class="glass info" aria-label="About this visualization" aria-expanded="false">i</button>
+  <footer><a href="https://seshing.github.io/" target="_blank" rel="noopener">Xiucheng Liang</a><span>· Environmental Exposure ·</span><a href="https://github.com/seshing/environmental-exposure-15-min" target="_blank" rel="noopener">GitHub ↗</a></footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
