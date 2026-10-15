@@ -9,7 +9,7 @@ $('close').onclick=closeDetails;
 function resetView(){const zoom=16.05-Math.log2((model.extentMeters||530)/530)+Math.log2(Math.min(1,innerWidth/900,innerHeight/720));map.flyTo({center:model.center,zoom,pitch:58,bearing:-25,duration:1100});}
 $('reset').onclick=()=>{closeDetails();resetView();};
 $('retry').onclick=()=>{loadPromise=null;openChip(activeChip);};
-window.addEventListener('keydown',event=>{if(event.key==='Escape'){closeMetricMenu();closeDetails();$('help').hidden=true;$('info').setAttribute('aria-expanded','false');}});
+window.addEventListener('keydown',event=>{if(event.key==='Escape'){closeMetricMenu();closeDetails();}});
 function updateVisibility(){
   $('buildings-toggle').setAttribute('aria-pressed',String(showBuildings));$('vegetation-toggle').setAttribute('aria-pressed',String(showVegetation));
   if(!showBuildings)closeDetails();

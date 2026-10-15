@@ -38,3 +38,19 @@
 @media(max-width:700px){.metric .model-trigger{font-size:11px;width:115px}.model-menu{top:calc(100% + 20px)}}
 
 .dual-exposure{display:grid;grid-template-columns:1fr 1fr;gap:16px}.dual-exposure span{font-size:29px;letter-spacing:-.7px}.dual-exposure small{font-size:11px}.nature-output span,.nature-output small{color:#187762}.openness-output span,.openness-output small{color:#2875a4}.building-summary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.building-summary small{display:block;font-size:10px;color:var(--muted);margin-bottom:6px}.building-summary span{font-size:13px}.rank-section{margin-top:18px;border-top:1px solid #293d3312}.eei-key{display:grid;grid-template-columns:1fr}.eei-key button{display:flex;align-items:center;gap:10px;text-align:left;padding:5px 7px}.eei-key i{width:22px;height:12px;margin:0;flex-shrink:0}
+
+/* One shared floating hover treatment for city and model points. */
+.map-hover{position:absolute;z-index:4;width:0;height:0;pointer-events:none;--dot-radius:6px;--dot-border:1.2px;--dot-color:#17806c}
+.hover-dot{position:absolute;display:block;width:calc(var(--dot-radius)*2);height:calc(var(--dot-radius)*2);background:var(--dot-color);border:var(--dot-border) solid white;border-radius:50%;opacity:0;transform:translate(-50%,-50%) scale(1);transition:transform .55s cubic-bezier(.2,.7,.2,1),opacity .4s,box-shadow .55s}
+.hover-label{position:absolute;left:calc(var(--dot-radius) + 14px);top:-3px;min-width:max-content;max-width:240px;padding:10px 13px;border-radius:12px;background:#fffffff2;border:1px solid #293d330c;box-shadow:0 6px 20px #28433512;backdrop-filter:blur(12px);opacity:0;transform:translate(-18px,-50%);transition:opacity .55s ease,transform .65s cubic-bezier(.2,.7,.2,1);text-align:left;white-space:nowrap}
+.hover-label strong{display:block;font-size:12px;font-weight:600;line-height:1.45;color:#2e4339}.hover-label span{display:block;font-size:10px;font-weight:600;color:#79867e;line-height:1.5;margin-top:2px}.hover-label span:empty{display:none}
+.map-hover.is-visible .hover-dot{opacity:1;transform:translate(-50%,calc(-50% - clamp(1px, var(--dot-radius) * .22, 3px))) scale(1.1);box-shadow:0 10px 18px #294f3b40}
+.map-hover.is-visible .hover-label{opacity:1;transform:translate(0,-50%)}
+@media(prefers-reduced-motion:reduce){.hover-dot,.hover-label{transition:none}}
+
+/* Keep legends and navigation on the same lower baseline. */
+.legend,.population-legend{bottom:40px}
+.maplibregl-ctrl-bottom-right{right:25px;bottom:40px}
+.maplibregl-ctrl-bottom-right>.maplibregl-ctrl-group{margin:0}
+.maplibregl-ctrl-bottom-right>.maplibregl-ctrl-attrib{position:absolute;right:0;top:calc(100% + 6px);margin:0;white-space:nowrap}
+@media(max-width:700px){.maplibregl-ctrl-bottom-right{right:14px}#overview-legend{bottom:127px}}
