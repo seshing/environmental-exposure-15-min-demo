@@ -3,6 +3,9 @@ const $=id=>document.getElementById(id),empty={type:'FeatureCollection',features
 async function json(url){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('Data unavailable');return response.json();}
 const [index,cities,usa,states]=await Promise.all([json('data/project/index.json'),json('data/project/cities.geojson'),json('data/usa.geojson'),json('data/states.geojson')]);
 const cityById=new Map(index.cities.map(city=>[city.id,city]));
+const modelCities=new Set(index.chips.map(chip=>chip.city));
+for(const feature of cities.features)feature.properties.hasModel=modelCities.has(feature.properties.id);
+function modelPoints(data){return {...data,features:data.features.filter(f=>f.properties.available===true).map(f=>{const coordinates=f.geometry.coordinates.flat(Infinity),xs=coordinates.filter((_,i)=>i%2===0),ys=coordinates.filter((_,i)=>i%2===1);return {...f,geometry:{type:'Point',coordinates:[(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2]}};})};}
 const map=new maplibregl.Map({container:'map',style:'map-style.json',center:[-99,38.5],zoom:3.25,minZoom:2,maxZoom:20,maxPitch:80,maxBounds:[[-179,-15],[-40,80]],canvasContextAttributes:{antialias:true},attributionControl:{compact:true}});
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'bottom-right');
 const viewer=createModelViewer(map),metroCache=new Map();let stage='us',currentCity=null,currentMetro=null,mode='profile',selectedColor=null,cityMapMode='access',selectedEEI=null,requestId=0;
@@ -15,11 +18,13 @@ function showLayers(ids,visible){for(const id of ids)if(map.getLayer(id))map.set
 function fitUS(duration=0){map.fitBounds([[-125,24],[-66,50]],{padding:{left:innerWidth<700?20:70,right:innerWidth<700?20:70,top:190,bottom:130},bearing:0,pitch:0,duration});}
 function setMode(next){
   mode=next;$('profile-mode').setAttribute('aria-pressed',String(mode==='profile'));$('local-mode').setAttribute('aria-pressed',String(mode==='local'));
+  map.setPaintProperty('city-model-glow','circle-color',mode==='profile'?['get','bivariate']:['interpolate',['linear'],['get','r'],-.8,'#08306b',-.4,'#6baed6',0,'#f7fbff']);
   map.setPaintProperty('cities','circle-color',mode==='profile'?['get','bivariate']:['interpolate',['linear'],['get','r'],-.8,'#08306b',-.4,'#6baed6',0,'#f7fbff']);
   applyCityFilter();renderOverviewLegend();
 }
 function applyCityFilter(){
-  map.setFilter('cities',mode==='profile'?(selectedColor?['==',['get','bivariate'],selectedColor]:null):['==',['get','significant'],true]);
+  const cityFilter=mode==='profile'?(selectedColor?['==',['get','bivariate'],selectedColor]:null):['==',['get','significant'],true];
+  map.setFilter('cities',cityFilter);map.setFilter('city-model-glow',cityFilter?['all',['==',['get','hasModel'],true],cityFilter]:['==',['get','hasModel'],true]);
   const query=$('city-filter').value.toLowerCase();
   for(const button of $('city-options').children)button.hidden=!button.textContent.toLowerCase().includes(query)||(mode==='profile'&&selectedColor&&cityById.get(button.dataset.city).bivariate!==selectedColor);
   tooltip.remove();
@@ -31,7 +36,7 @@ function renderOverviewLegend(){
 }
 function overview(push=true){
   ++requestId;document.body.classList.remove('has-msa-details');stage='us';currentCity=null;currentMetro=null;viewer.hide();tooltip.remove();$('city-panel').hidden=true;$('ring-legend').hidden=true;$('cbg-note').hidden=true;$('msa-details').hidden=true;$('city-map-switch').hidden=true;$('chip-hint').hidden=true;$('back').hidden=true;$('location').textContent='United States';$('overview-switch').hidden=false;$('city-picker').hidden=false;$('overview-legend').hidden=false;$('population-legend').hidden=false;$('loading').hidden=true;
-  showLayers(['cities','state-outline'],true);showLayers(['msa-fill','msa-line','rings-fill','rings-line','chip-fill','chip-line','chip-label','region-outline'],false);map.getSource('region').setData(empty);fitUS(800);if(push)writeRoute('');
+  showLayers(['cities','city-model-glow','state-outline'],true);showLayers(['msa-fill','msa-line','rings-fill','rings-line','chip-point','chip-glow','region-outline'],false);map.getSource('region').setData(empty);fitUS(800);if(push)writeRoute('');
 }
 function cityChart(city){
   const limits=key=>{const values=index.cities.map(c=>c[key]),min=Math.min(...values),max=Math.max(...values),pad=(max-min)*.07;return [Math.floor((min-pad)*20)/20,Math.ceil((max+pad)*20)/20];};
@@ -61,19 +66,19 @@ function cityPanel(city,metro){
 }
 async function openCity(id,push=true){
   const city=cityById.get(id);if(!city)return;const token=++requestId;stage='msa';currentCity=city;viewer.hide();tooltip.remove();$('overview-switch').hidden=true;$('city-picker').hidden=true;$('overview-legend').hidden=true;$('population-legend').hidden=true;$('back').hidden=false;$('back').setAttribute('aria-label','Back to United States');$('location').textContent=city.shortName+' MSA';$('msa-details').hidden=false;$('city-map-switch').hidden=false;$('city-panel').hidden=true;$('ring-legend').hidden=true;$('cbg-note').hidden=true;
-  showLayers(['cities','state-outline','region-outline','chip-fill','chip-line','chip-label'],false);map.getSource('region').setData(empty);if(push)writeRoute('#msa/'+id);
+  showLayers(['cities','city-model-glow','state-outline','region-outline','chip-point','chip-glow'],false);map.getSource('region').setData(empty);if(push)writeRoute('#msa/'+id);
   $('loading-text').textContent='Loading MSA';$('loading').hidden=false;$('retry').hidden=true;
   try{
     const metro=metroCache.get(id)||await json('data/project/metros/'+id+'.json');metroCache.set(id,metro);if(token!==requestId)return;currentMetro=metro;
     map.getSource('msa').setData(metro.boundary);showLayers(['msa-fill','msa-line'],true);
     const rings=metro.rings.length?await json('data/project/metros/'+id+'-rings.geojson'):empty;if(token!==requestId)return;map.getSource('rings').setData(rings);showLayers(['rings-fill','rings-line'],true);
-    const chips=metro.hasChip?await json(metro.chipsFile||'data/project/washington-chips.geojson'):empty;if(token!==requestId)return;map.getSource('chips').setData(chips);showLayers(['chip-fill','chip-line','chip-label'],metro.hasChip);
+    const chips=metro.hasChip?await json(metro.chipsFile||'data/project/washington-chips.geojson'):empty;if(token!==requestId)return;map.getSource('chips').setData(modelPoints(chips));showLayers(['chip-point','chip-glow'],metro.hasChip);
     cityPanel(city,metro);selectedEEI=null;renderCityMap();$('ring-legend').hidden=!metro.rings.length;$('loading').hidden=true;
     const side=innerWidth<700?20:60;map.fitBounds([[metro.bounds[0],metro.bounds[1]],[metro.bounds[2],metro.bounds[3]]],{padding:{left:side,right:innerWidth<700?side:360,top:140,bottom:innerWidth<700?Math.min($('city-panel').offsetHeight+82,innerHeight-220):100},bearing:0,pitch:0,duration:1000});
   }catch(error){if(token!==requestId)return;$('loading-text').textContent='MSA data unavailable';$('retry').hidden=false;$('retry').onclick=()=>openCity(id,false);}
 }
 async function openChip(chipId=null,push=true){
-  const chip=chipId?index.chips.find(item=>item.id===chipId):index.chips.find(item=>item.city===currentCity?.id);if(!chip)return;stage='chip';tooltip.remove();map.getCanvas().style.cursor='';document.body.classList.remove('has-msa-details');++requestId;$('msa-details').hidden=true;$('city-map-switch').hidden=true;$('chip-hint').hidden=true;$('city-panel').hidden=true;$('ring-legend').hidden=true;$('cbg-note').hidden=true;$('location').textContent='Model';$('back').setAttribute('aria-label','Back to MSA');showLayers(['msa-fill','msa-line','rings-fill','rings-line','chip-fill','chip-line','chip-label'],false);showLayers(['region-outline'],true);if(push)writeRoute('#chip/'+chip.id);await viewer.open(chip.manifest);
+  const chip=chipId?index.chips.find(item=>item.id===chipId):index.chips.find(item=>item.city===currentCity?.id);if(!chip)return;stage='chip';tooltip.remove();map.getCanvas().style.cursor='';document.body.classList.remove('has-msa-details');++requestId;$('msa-details').hidden=true;$('city-map-switch').hidden=true;$('chip-hint').hidden=true;$('city-panel').hidden=true;$('ring-legend').hidden=true;$('cbg-note').hidden=true;$('location').textContent='Model';$('back').setAttribute('aria-label','Back to MSA');showLayers(['msa-fill','msa-line','rings-fill','rings-line','chip-point','chip-glow'],false);showLayers(['region-outline'],true);if(push)writeRoute('#chip/'+chip.id);await viewer.open(chip.manifest);
 }
 $('profile-mode').onclick=()=>setMode('profile');$('local-mode').onclick=()=>setMode('local');
 $('back').onclick=()=>stage==='chip'?openCity(currentCity.id):overview();
@@ -104,12 +109,12 @@ map.on('click',event=>{
   if(event.originalEvent?.target?.closest?.('button,select')||map.isMoving())return;
   if(stage==='us'){const hit=map.queryRenderedFeatures(event.point,{layers:['cities']})[0];if(hit)openCity(hit.properties.id);}
   else if(stage==='msa'){
-    const hits=map.queryRenderedFeatures(event.point,{layers:['chip-fill','rings-fill']});const chip=hits.find(h=>h.layer.id==='chip-fill'&&(h.properties.available===true||h.properties.available==='true'));
+    const hits=map.queryRenderedFeatures(event.point,{layers:['chip-point','rings-fill']});const chip=hits.find(h=>h.layer.id==='chip-point'&&(h.properties.available===true||h.properties.available==='true'));
     if(chip){openChip(chip.properties.chipId);return;}const cbg=hits.find(h=>h.layer.id==='rings-fill');if(cbg)showCBG(cbg);
   }
 });
 map.on('mousemove',event=>{
-  const layerName=stage==='us'?'cities':stage==='msa'?'chip-fill':null;if(!layerName){tooltip.remove();$('chip-hint').hidden=true;map.getCanvas().style.cursor='';return;}
+  const layerName=stage==='us'?'cities':stage==='msa'?'chip-point':null;if(!layerName){tooltip.remove();$('chip-hint').hidden=true;map.getCanvas().style.cursor='';return;}
   const features=map.queryRenderedFeatures(event.point,{layers:[layerName]});const f=features[0];map.getCanvas().style.cursor=f?'pointer':'';
   if(stage==='msa'){
     const available=f&&(f.properties.available===true||f.properties.available==='true');$('chip-hint').hidden=true;map.getCanvas().style.cursor=available?'pointer':'';
@@ -125,11 +130,14 @@ map.once('load',()=>{
   map.addSource('states',{type:'geojson',data:states});map.addLayer({id:'state-outline',type:'line',source:'states',maxzoom:10,paint:{'line-color':'#aebdb3','line-width':.55,'line-opacity':.5}});
   map.addSource('usa',{type:'geojson',data:usa});map.addLayer({id:'usa-outline',type:'line',source:'usa',maxzoom:10,paint:{'line-color':'#647f70','line-opacity':.25,'line-width':1}});
   for(const source of ['msa','rings','chips','region'])map.addSource(source,{type:'geojson',data:empty});
-  map.addSource('cities',{type:'geojson',data:cities});map.addLayer({id:'cities',type:'circle',source:'cities',paint:{'circle-color':['get','bivariate'],'circle-radius':['step',['get','population'],3.4,250000,4.7,500000,6.6,1000000,8.1,2000000,11.4,5000000,14.7],'circle-opacity':.9,'circle-stroke-color':'#ffffff','circle-stroke-width':.8}});
+  map.addSource('cities',{type:'geojson',data:cities});
+  const cityRadius=['step',['get','population'],3.4,250000,4.7,500000,6.6,1000000,8.1,2000000,11.4,5000000,14.7];
+  map.addLayer({id:'city-model-glow',type:'circle',source:'cities',filter:['==',['get','hasModel'],true],paint:{'circle-color':['get','bivariate'],'circle-radius':['+',cityRadius,8],'circle-blur':.85,'circle-opacity':.28}});
+  map.addLayer({id:'cities',type:'circle',source:'cities',paint:{'circle-color':['get','bivariate'],'circle-radius':cityRadius,'circle-opacity':.9,'circle-stroke-color':['case',['==',['get','hasModel'],true],'#32483e','#ffffff'],'circle-stroke-width':['case',['==',['get','hasModel'],true],2.4,.8]}});
   map.addLayer({id:'msa-fill',type:'fill',source:'msa',layout:{visibility:'none'},paint:{'fill-color':'#bbc9c0','fill-opacity':0}});map.addLayer({id:'msa-line',type:'line',source:'msa',layout:{visibility:'none'},paint:{'line-color':'#426754','line-width':1.4,'line-opacity':.7}});
   const match=['match',['get','ring'],...Object.entries(ringColors).flat(),'#c4cbc7'];map.addLayer({id:'rings-fill',type:'fill',source:'rings',layout:{visibility:'none'},paint:{'fill-color':match,'fill-opacity':['case',['==',['get','hasExposure'],true],.58,0]}});map.addLayer({id:'rings-line',type:'line',source:'rings',layout:{visibility:'none'},paint:{'line-color':'#ffffff','line-width':.35,'line-opacity':.7}});
-  map.addLayer({id:'chip-fill',type:'fill',source:'chips',layout:{visibility:'none'},paint:{'fill-color':['case',['==',['get','available'],true],'#229c70','#52695d'],'fill-opacity':['case',['==',['get','available'],true],.30,.035]}});map.addLayer({id:'chip-line',type:'line',source:'chips',layout:{visibility:'none'},paint:{'line-color':['case',['==',['get','available'],true],'#12754e','#466754'],'line-width':['case',['==',['get','available'],true],2.5,.55],'line-opacity':['case',['==',['get','available'],true],1,.35]}});
-  map.addLayer({id:'chip-label',type:'symbol',source:'chips',filter:['==',['get','available'],true],minzoom:7,layout:{visibility:'none','text-field':'','text-font':['Noto Sans Regular'],'text-size':12,'text-allow-overlap':true},paint:{'text-color':'#126640','text-halo-color':'#ffffff','text-halo-width':1.5}});
+  map.addLayer({id:'chip-glow',type:'circle',source:'chips',layout:{visibility:'none'},paint:{'circle-color':'#229c70','circle-radius':17,'circle-blur':.85,'circle-opacity':.28}});
+  map.addLayer({id:'chip-point',type:'circle',source:'chips',layout:{visibility:'none'},paint:{'circle-color':'#17806c','circle-radius':6,'circle-opacity':1,'circle-stroke-color':'#ffffff','circle-stroke-width':1.5}});
   map.addLayer({id:'region-outline',type:'line',source:'region',paint:{'line-color':'#17806c','line-width':1,'line-opacity':.3}});
   renderOverviewLegend();followRoute();
 });
