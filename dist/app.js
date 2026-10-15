@@ -1,4 +1,4 @@
-import {createModelViewer} from './model-view.js';
+import {createModelViewer} from './model-view.js?v=582a1f0ce3';
 const $=id=>document.getElementById(id),empty={type:'FeatureCollection',features:[]};
 async function json(url){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('Data unavailable');return response.json();}
 const [index,cities,usa,states]=await Promise.all([json('data/project/index.json'),json('data/project/cities.geojson'),json('data/usa.geojson'),json('data/states.geojson')]);
